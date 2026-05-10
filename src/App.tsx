@@ -1,60 +1,52 @@
-import styles from "./App.module.css";
 import { useState } from "react";
+import styles from "./App.module.css";
 import { fetchMovies } from "./services/movieService";
 import type { Movie } from "./types/movie";
+
+import SearchBar from "./components/SearchBar/SearchBar";
 import MovieGrid from "./components/MovieGrid/MovieGrid";
 import Loader from "./components/Loader/Loader";
 import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
 import MovieModal from "./components/MovieModal/MovieModal";
+import { toast } from "react-hot-toast";
 
 function App() {
-  const [query, setQuery] = useState("");
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedMovie, setSelectedMovie] = useState<null | Movie>(null);
+  const [error, setError] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const handleSearch = async () => {
-    setError(null);
-    setLoading(true);
+  const handleSearch = async (query: string) => {
     setMovies([]);
+    setError(false);
+    setLoading(true);
 
     try {
       const data = await fetchMovies(query);
-      setMovies(data.results);
 
-      if (data.results.length === 0) {
-        setError("No movies found");
+      if (!data.results.length) {
+        toast.error("No movies found for your request.");
+        return;
       }
+
+      setMovies(data.results);
     } catch {
-      setError("Something went wrong");
+      setError(true);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSelectMovie = (movie: Movie) => {
-    setSelectedMovie(movie);
-  };
-
-   return (
+  return (
     <div className={styles.container}>
-
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search movie"
-      />
-
-      <button onClick={handleSearch}>Search</button>
+      <SearchBar onSubmit={handleSearch} />
 
       {loading && <Loader />}
 
       {error && <ErrorMessage />}
 
-      {!loading && !error && (
-        <MovieGrid movies={movies} onSelect={handleSelectMovie} />
+      {!loading && !error && movies.length > 0 && (
+        <MovieGrid movies={movies} onSelect={setSelectedMovie} />
       )}
 
       {selectedMovie && (
@@ -63,7 +55,6 @@ function App() {
           onClose={() => setSelectedMovie(null)}
         />
       )}
-
     </div>
   );
 }
