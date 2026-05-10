@@ -26,6 +26,7 @@ function App() {
 
       if (!data.results.length) {
         toast.error("No movies found for your request.");
+        setLoading(false);
         return;
       }
 
