@@ -1,6 +1,3 @@
-"use client";
-
-import { useActionState } from "react";
 import toast from "react-hot-toast";
 import styles from "./SearchBar.module.css";
 
@@ -8,29 +5,23 @@ interface SearchBarProps {
   onSubmit: (query: string) => void;
 }
 
-interface FormState {
-  query: string;
-}
-
-const initialState: FormState = {
-  query: "",
-};
-
 export default function SearchBar({ onSubmit }: SearchBarProps) {
-  const [, formAction] = useActionState(
-    (_: FormState, formData: FormData) => {
-      const query = formData.get("query") as string;
+  const formAction = (formData: FormData) => {
+    const value = formData.get("query");
 
-      if (!query.trim()) {
-        toast.error("Please enter your search query.");
-        return { query: "" };
-      }
+    if (typeof value !== "string") {
+      return;
+    }
 
-      onSubmit(query);
-      return { query: "" };
-    },
-    initialState
-  );
+    const query = value.trim();
+
+    if (!query) {
+      toast.error("Please enter your search query.");
+      return;
+    }
+
+    onSubmit(query);
+  };
 
   return (
     <header className={styles.header}>

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
 import { fetchMovies } from "./services/movieService";
 import type { Movie } from "./types/movie";
 
@@ -8,6 +7,7 @@ import MovieGrid from "./components/MovieGrid/MovieGrid";
 import Loader from "./components/Loader/Loader";
 import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
 import MovieModal from "./components/MovieModal/MovieModal";
+import { toast, Toaster } from "react-hot-toast";
 
 export default function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -15,26 +15,32 @@ export default function App() {
   const [error, setError] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
+
   const handleSearch = async (query: string) => {
-    try {
-      setLoading(true);
-      setError(false);
+  if (!query.trim()) {
+    toast.error("Please enter your search query.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setError(false);
+
+    const data = await fetchMovies(query);
+
+    if (data.length === 0) {
+      toast.error("No movies found for your request.");
       setMovies([]);
-
-      const data = await fetchMovies(query);
-
-      if (data.length === 0) {
-        toast.error("No movies found for your request.");
-        return;
-      }
-
-      setMovies(data);
-    } catch  {
-      setError(true);
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
+
+    setMovies(data);
+  } catch {
+    setError(true);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>
