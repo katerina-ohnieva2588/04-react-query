@@ -1,60 +1,51 @@
-import styles from "./App.module.css";
 import { useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
 import { fetchMovies } from "./services/movieService";
 import type { Movie } from "./types/movie";
+
+import SearchBar from "./components/SearchBar/SearchBar";
 import MovieGrid from "./components/MovieGrid/MovieGrid";
 import Loader from "./components/Loader/Loader";
 import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
 import MovieModal from "./components/MovieModal/MovieModal";
 
-function App() {
-  const [query, setQuery] = useState("");
+export default function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedMovie, setSelectedMovie] = useState<null | Movie>(null);
+  const [error, setError] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const handleSearch = async () => {
-    setError(null);
-    setLoading(true);
-    setMovies([]);
-
+  const handleSearch = async (query: string) => {
     try {
-      const data = await fetchMovies(query);
-      setMovies(data.results);
+      setLoading(true);
+      setError(false);
+      setMovies([]);
 
-      if (data.results.length === 0) {
-        setError("No movies found");
+      const data = await fetchMovies(query);
+
+      if (data.length === 0) {
+        toast.error("No movies found for your request.");
+        return;
       }
-    } catch {
-      setError("Something went wrong");
+
+      setMovies(data);
+    } catch  {
+      setError(true);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSelectMovie = (movie: Movie) => {
-    setSelectedMovie(movie);
-  };
-
-   return (
-    <div className={styles.container}>
-
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search movie"
-      />
-
-      <button onClick={handleSearch}>Search</button>
+  return (
+    <>
+      <SearchBar onSubmit={handleSearch} />
+      <Toaster position="top-right" />
 
       {loading && <Loader />}
-
       {error && <ErrorMessage />}
 
-      {!loading && !error && (
-        <MovieGrid movies={movies} onSelect={handleSelectMovie} />
+      {!loading && !error && movies.length > 0 && (
+        <MovieGrid movies={movies} onSelect={setSelectedMovie} />
       )}
 
       {selectedMovie && (
@@ -63,9 +54,6 @@ function App() {
           onClose={() => setSelectedMovie(null)}
         />
       )}
-
-    </div>
+    </>
   );
 }
-
-export default App;

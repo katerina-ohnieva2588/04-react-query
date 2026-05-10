@@ -10,7 +10,7 @@ interface FetchMoviesResponse {
 
 export const fetchMovies = async (
   query: string
-): Promise<FetchMoviesResponse> => {
+): Promise<Movie[]> => {
   const response = await axios.get<FetchMoviesResponse>(
     `${BASE_URL}/search/movie`,
     {
@@ -23,5 +23,5 @@ export const fetchMovies = async (
     }
   );
 
-  return response.data;
+  return response.data.results; 
 };

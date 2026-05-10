@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import styles from "./MovieModal.module.css";
 import type { Movie } from "../../types/movie";
-import css from "./MovieModal.module.css";
 
 interface MovieModalProps {
   movie: Movie;
@@ -9,70 +9,50 @@ interface MovieModalProps {
 }
 
 export default function MovieModal({ movie, onClose }: MovieModalProps) {
-  const modalRoot = document.getElementById("modal-root");
-
   useEffect(() => {
     document.body.style.overflow = "hidden";
 
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
+      if (e.key === "Escape") onClose();
     };
 
-    window.addEventListener("keydown", handleEsc);
+    document.addEventListener("keydown", handleEsc);
 
     return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", handleEsc);
+      document.body.style.overflow = "auto";
+      document.removeEventListener("keydown", handleEsc);
     };
   }, [onClose]);
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
+    if (e.target === e.currentTarget) onClose();
   };
 
-  if (!modalRoot) return null;
-
   return createPortal(
-    <div
-      className={css.backdrop}
-      role="dialog"
-      aria-modal="true"
-      onClick={handleBackdropClick}
-    >
-      <div className={css.modal}>
-        <button
-          className={css.closeButton}
-          aria-label="Close modal"
-          onClick={onClose}
-        >
+    <div className={styles.backdrop} onClick={handleBackdropClick}>
+      <div className={styles.modal}>
+        <button className={styles.closeButton} onClick={onClose}>
           &times;
         </button>
 
         <img
           src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
           alt={movie.title}
-          className={css.image}
+          className={styles.image}
         />
 
-        <div className={css.content}>
+        <div className={styles.content}>
           <h2>{movie.title}</h2>
-
           <p>{movie.overview}</p>
-
           <p>
             <strong>Release Date:</strong> {movie.release_date}
           </p>
-
           <p>
             <strong>Rating:</strong> {movie.vote_average}/10
           </p>
         </div>
       </div>
     </div>,
-    modalRoot
+    document.body
   );
 }
