@@ -7,7 +7,10 @@ interface MovieGridProps {
 }
 
 export default function MovieGrid({ movies, onSelect }: MovieGridProps) {
-  if (!movies.length) return null;
+
+  if (movies.length === 0) {
+    return <p className={styles.empty}>No movies found</p>;
+  }
 
   return (
     <ul className={styles.grid}>
@@ -16,11 +19,16 @@ export default function MovieGrid({ movies, onSelect }: MovieGridProps) {
           <div
             className={styles.card}
             onClick={() => onSelect(movie)}
+            role="button"
+            tabIndex={0}
           >
             <img
               className={styles.image}
-              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-              alt={movie.title}
+              src={
+              movie.poster_path
+              ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+              : "/no-image.png"}
+              alt={`Poster of ${movie.title}`}
               loading="lazy"
             />
             <h2 className={styles.title}>{movie.title}</h2>
