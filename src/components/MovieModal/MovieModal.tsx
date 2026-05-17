@@ -28,22 +28,38 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
 
   if (!movie) return null;
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return createPortal(
-    <div className={styles.backdrop} onClick={onClose}>
+    <div className={styles.backdrop} onClick={handleBackdropClick}>
       <div className={styles.modal}>
-        <button onClick={onClose}>&times;</button>
+        <button onClick={onClose} aria-label="Close modal">
+          &times;
+        </button>
 
         <img
           src={
-            movie.backdrop_path
-              ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
-              : "https://placehold.co/500x750?text=No+Image"
+            movie.poster_path
+              ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+              : "https://via.placeholder.com/500x750?text=No+Image"
           }
-          alt={movie.title ?? "No title"}
+          alt={movie.title}
         />
 
         <h2>{movie.title}</h2>
+
         <p>{movie.overview}</p>
+
+        <p>
+          <b>Release date:</b> {movie.release_date}
+        </p>
+
+        <p>
+          <b>Rating:</b> {movie.vote_average}</p>
       </div>
     </div>,
     document.body

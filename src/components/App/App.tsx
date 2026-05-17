@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Toaster, toast } from "react-hot-toast";
 
 import { fetchMovies } from "../../services/movieService";
 
@@ -26,6 +27,7 @@ export default function App() {
     queryKey: ["movies", query, page],
     queryFn: () => fetchMovies(query, page),
     enabled: !!query.trim(),
+    placeholderData: (prev) => prev,
   });
 
   const movies = data?.results ?? [];
@@ -36,14 +38,21 @@ export default function App() {
     setPage(1);
   };
 
+  useEffect(() => {
+    if (query && !isLoading && movies.length === 0) {
+      toast.error("No movies found");
+    }
+  }, [query, isLoading, movies.length]);
+
   return (
     <>
+      <Toaster position="top-right" />
+
       <SearchBar onSubmit={handleSearch} />
 
       {isLoading && <Loader />}
 
       {isError && <ErrorMessage />}
-
 
       {!isLoading && !isError && query && movies.length === 0 && (
         <p>No movies found</p>
@@ -66,6 +75,7 @@ export default function App() {
       {!isLoading && !isError && movies.length > 0 && (
         <MovieGrid movies={movies} onSelect={setSelectedMovie} />
       )}
+
       {selectedMovie && (
         <MovieModal
           movie={selectedMovie}
