@@ -24,11 +24,11 @@ export default function App() {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["movies", query, page],
-    queryFn: () => fetchMovies(query, page),
-    enabled: !!query.trim(),
-    placeholderData: (prev) => prev,
-  });
+  queryKey: ["movies", query, page],
+  queryFn: () => fetchMovies(query, page),
+  enabled: !!query.trim(),
+  placeholderData: (previousData) => previousData,
+});
 
   const movies = data?.results ?? [];
   const totalPages = data?.total_pages ?? 0;
